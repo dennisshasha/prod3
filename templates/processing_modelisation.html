@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="pragma" content="no-cache" />
+        <title>VisualTango Vision Update</title>
+        <link rel="stylesheet" href="{{ url_for('static',filename='css/TemplateData/style.css')}}" />
+    </head>
+    <body>
+        <p> Processing of the video</p>
+        <form id="hidden-form" action="{{ url_for('result_modelisation',id=id)}}" method="post" style="display: none;">
+           </form>
+    </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+
+    <script>
+      var socket = io();
+      console.log(socket);
+      const activateButton1 = document.getElementById('finishButton1');
+      const activateButton2 = document.getElementById('finishButton2');
+      const form2 = document.getElementById("form2")
+      const form3 = document.getElementById("form3")
+      const modelisation_task_id = '{{ modelisation_task_id }}';  
+      console.log(socket);
+
+        socket.on('connect', function() {
+            console.log('Socket connected');
+            
+            var id = "{{ id }}"; // Récupérer l'identifiant unique depuis le template Flask
+            console.log(id)
+            socket.emit('join', {room: id}); // Rejoindre la "room" spécifique à cette tâche
+        });
+
+        socket.on('modelisation_completed', function(data) {
+            console.log("okok");
+            console.log(data['id']);
+            console.log('{{id}}');
+            if (data['id'] == '{{id}}') {
+                        
+                var hiddenForm = document.getElementById('hidden-form');
+                hiddenForm.submit();             
+                
+                console.log("okok");
+            }
+        });
+        
+        socket.on('modelisation_processing', function(data) {
+            console.log('modelisation still processing');
+        });
+
+        // Exécuter une requête toutes les X secondes
+        var interval = 5000;  // Remplacez par l'intervalle en millisecondes
+        setInterval(function() {
+            var id = '{{id}}';
+            socket.emit('request_modelisation_status',{room:id});  // Émettre la requête au serveur
+            console.log('request sent');
+        }, interval);
+
+    </script>
+</html>
+    

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="pragma" content="no-cache" />
+        <title>VisualTango Vision Update</title>
+        <link rel="stylesheet" href="{{ url_for('static',filename='css/TemplateData/style.css')}}" />
+    </head>
+    <body>
+        <h1>Visual Tango</h1>
+        <div class="text">
+            <p>
+                Use the basic version of VisualTango to create choregraphy
+            </p>
+        </div>
+        <div class="div_form" id="form1">
+            <form action="{{ url_for('visualtango',id=id)}}" method="post" enctype="multipart/form-data" autocomplete="off">
+                
+                <input type="submit" value="Launch" onclick="createLoader('form1')">
+            </form>
+         </div>
+
+
+        <h1>Classify the movement</h1>
+        <div class="text">
+            <p>
+                Upload your video here to be able to see which tango movement the person in your video is doing.
+                You'll be able to add and delete movement to te choregraphy.
+            </p>
+        </div>
+        <div class="div_form" id="form2">
+            <form action="{{ url_for('classification',id=id)}}" method="post" enctype="multipart/form-data" autocomplete="off">
+                <input type="file" name="input_file1" accept="video/">
+                <input type="submit" value="Process" onclick="createLoader('form2')">
+                <button id="finishButton1" onclick="finishTask('finishButton1')" disabled>Launch</button>
+            </form>
+         </div>
+
+        <h1>Modelise your dancing in Unity</h1>
+        <div class="text">
+            <p>
+                Upload your video here to be able to see a model doing the choregraphy from the video
+            </p>
+        </div>
+        <div class="div_form" id="form3">
+            <form action="{{ url_for('modelisation',id=id)}}" method="post" enctype="multipart/form-data" autocomplete="off">
+                <input type="file" name="input_file2" id="input_file2" accept="video/">
+                <input type="submit" value="Process" onclick="createLoader('form3')">
+                <button id="finishButton2" onclick="finishTask('finishButton2')" disabled>Launch</button>
+            </form>
+        </div>  
+        <div> Please note that the calculation may take some time</div>
+        
+    </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+            crossorigin="anonymous"></script>
+    <script>
+        var socket = io();
+        console.log(socket);
+        const activateButton1 = document.getElementById('finishButton1');
+        const activateButton2 = document.getElementById('finishButton2');
+        const form2 = document.getElementById("form2")
+        const form3 = document.getElementById("form3")
+        const modelisation_task_id = '{{ modelisation_task_id }}';  
+        const classification_task_id = '{{ classification_task_id }}'; 
+        console.log(socket);
+        socket.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+        });
+
+        socket.on('connect_timeout', (timeout) => {
+            console.error('Socket connection timeout:', timeout);
+        });
+
+        socket.on('connect', function() {
+            console.log('Socket connected');
+            var id = "{{ id }}"; // Récupérer l'identifiant unique depuis le template Flask
+            socket.emit('join', {room: id}); // Rejoindre la "room" spécifique à cette tâche
+        });
+
+        socket.on('status', function(data) {
+            console.log('Status:', data.msg);
+        });
+
+        function createLoader(input){
+                form = document.getElementById(input);
+                if (input=="form1"){
+                    if (form.querySelector("spinner1") == null){
+                        const div = document.createElement("div");
+                        div.className = "spinner";
+                        div.id="spinner1";
+                        form.appendChild(div);
+                    }
+                } else if (input=="form2"){
+                    if (form.querySelector("spinner2") == null){
+                        const div = document.createElement("div");
+                        div.className = "spinner";
+                        div.id="spinner2"
+                        form.appendChild(div);
+                    }
+                }else if (input=="form3"){
+                    if (form.querySelector("spinner3") == null){
+                        const div = document.createElement("div");
+                        div.className = "spinner";
+                        div.id="spinner3"
+                        form.appendChild(div);
+                    }
+                }
+        }
+        console.log(socket);
+
+    </script>
+</html>
